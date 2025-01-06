@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from typing import Annotated, Optional
 from app.db.database_connection import SessionLocal, get_db
 from app.models.User import User
-from app.schema.user_schema import UserInCreate, UserInResponse
+from app.schema.user_schema import UserInCreate, UserInResponse, UserInUpdate
 from uuid import UUID
 
 userrouter = APIRouter()
@@ -28,9 +28,19 @@ def get_user(user_id: UUID, db: db_dependency): # type: ignore
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
     return user
 
-@userrouter.put("/", status_code=status.HTTP_200_OK)
-def update_user():
-    return {"message": "user"}
+@userrouter.put("/{user_id}", status_code=status.HTTP_200_OK)
+def update_user(user_id: UUID, user: UserInUpdate, db: db_dependency): # type: ignore
+    user_db = db.query(User).filter(User.id == user_id).first()
+    if user is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+    
+    user_db.name = user.name
+    user_db.email = user.email
+    user_db.password = user.password
+    db.commit()
+    db.refresh(user_db)
+    return user_db
+
 
 @userrouter.delete("/", status_code=status.HTTP_200_OK)
 def delete_user():
