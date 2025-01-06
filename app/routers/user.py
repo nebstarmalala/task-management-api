@@ -42,6 +42,11 @@ def update_user(user_id: UUID, user: UserInUpdate, db: db_dependency): # type: i
     return user_db
 
 
-@userrouter.delete("/", status_code=status.HTTP_200_OK)
-def delete_user():
-    return {"message": "user"}
+@userrouter.delete("/{user_id}", status_code=status.HTTP_200_OK)
+def delete_user(user_id: UUID, db: db_dependency): # type: ignore
+    user = db.query(User).filter(User.id == user_id).first()
+    if user is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+    db.delete(user)
+    db.commit()
+    return
