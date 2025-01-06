@@ -1,6 +1,7 @@
 from pydantic import EmailStr, BaseModel
 from typing import Union
 from uuid import UUID 
+from datetime import datetime
 
 class UserInCreate(BaseModel):
     name: str
@@ -11,8 +12,8 @@ class UserInResponse(BaseModel):
     id: UUID
     name: str
     email: str
-    created_at: str
-    updated_at: str
+    created_at: datetime
+    updated_at: datetime
 
 class UserInUpdate(BaseModel):
     id: UUID
