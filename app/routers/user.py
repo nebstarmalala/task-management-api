@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from typing import Annotated, Optional
+from typing import Annotated, Optional, List
 from app.db.database_connection import SessionLocal, get_db
 from app.models.User import User
 from app.schema.user_schema import UserInCreate, UserInResponse, UserInUpdate
@@ -9,7 +9,7 @@ userrouter = APIRouter()
 db_dependency = Annotated[SessionLocal, Depends(get_db)]
 
 @userrouter.get("/", status_code=status.HTTP_200_OK)
-async def list_users(db: db_dependency): # type: ignore
+async def list_users(db: db_dependency) -> List[UserInResponse]: # type: ignore
     users = db.query(User).all()
     return users
 
@@ -22,14 +22,14 @@ def create_user(user: UserInCreate, db: db_dependency) -> UserInResponse: # type
     return user
 
 @userrouter.get("/{user_id}", status_code=status.HTTP_200_OK)
-def get_user(user_id: UUID, db: db_dependency): # type: ignore
+def get_user(user_id: UUID, db: db_dependency) -> UserInResponse: # type: ignore
     user = db.query(User).filter(User.id == user_id).first()
     if user is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
     return user
 
 @userrouter.put("/{user_id}", status_code=status.HTTP_200_OK)
-def update_user(user_id: UUID, user: UserInUpdate, db: db_dependency): # type: ignore
+def update_user(user_id: UUID, user: UserInUpdate, db: db_dependency) -> UserInResponse: # type: ignore
     user_db = db.query(User).filter(User.id == user_id).first()
     if user is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
