@@ -3,6 +3,7 @@ from typing import Annotated, Optional
 from app.db.database_connection import SessionLocal, get_db
 from app.models.User import User
 from app.schema.user_schema import UserInCreate, UserInResponse
+from uuid import UUID
 
 userrouter = APIRouter()
 db_dependency = Annotated[SessionLocal, Depends(get_db)]
@@ -20,9 +21,12 @@ def create_user(user: UserInCreate, db: db_dependency) -> UserInResponse: # type
     db.refresh(user)
     return user
 
-@userrouter.get("/{user_id}/", status_code=status.HTTP_200_OK)
-def get_user():
-    return {"message": "user"}
+@userrouter.get("/{user_id}", status_code=status.HTTP_200_OK)
+def get_user(user_id: UUID, db: db_dependency): # type: ignore
+    user = db.query(User).filter(User.id == user_id).first()
+    if user is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+    return user
 
 @userrouter.put("/", status_code=status.HTTP_200_OK)
 def update_user():
