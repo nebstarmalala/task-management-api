@@ -8,3 +8,4 @@ routers/__pycache__/*
 .pytest_cache/
 .pyre/
 .pytype/
+task-management/
