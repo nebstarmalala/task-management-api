@@ -4,9 +4,11 @@ from app.db.database_connection import SessionLocal, get_db
 from app.models.User import User
 from app.schema.user_schema import UserInCreate, UserInResponse, UserInUpdate
 from uuid import UUID
+from passlib.context import CryptContext
 
 userrouter = APIRouter()
 db_dependency = Annotated[SessionLocal, Depends(get_db)]
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 @userrouter.get("/", status_code=status.HTTP_200_OK)
 async def list_users(db: db_dependency) -> List[UserInResponse]: # type: ignore
@@ -15,7 +17,7 @@ async def list_users(db: db_dependency) -> List[UserInResponse]: # type: ignore
 
 @userrouter.post("/", status_code=status.HTTP_201_CREATED)
 def create_user(user: UserInCreate, db: db_dependency) -> UserInResponse: # type: ignore
-    user = User(name=user.name, email=user.email, password=user.password)
+    user = User(name=user.name, email=user.email, password=pwd_context.hash(user.password))
     db.add(user)
     db.commit()
     db.refresh(user)
@@ -36,7 +38,7 @@ def update_user(user_id: UUID, user: UserInUpdate, db: db_dependency) -> UserInR
     
     user_db.name = user.name
     user_db.email = user.email
-    user_db.password = user.password
+    user_db.password = pwd_context.hash(user.password)
     db.commit()
     db.refresh(user_db)
     return user_db
