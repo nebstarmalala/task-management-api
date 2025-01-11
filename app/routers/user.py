@@ -17,7 +17,7 @@ async def list_users(db: db_dependency) -> List[UserInResponse]: # type: ignore
 
 @userrouter.post("/", status_code=status.HTTP_201_CREATED)
 def create_user(user: UserInCreate, db: db_dependency) -> UserInResponse: # type: ignore
-    user = User(name=user.name, email=user.email, password=pwd_context.hash(user.password))
+    user = User(name=user.name, username=user.username, email=user.email, password=pwd_context.hash(user.password))
     db.add(user)
     db.commit()
     db.refresh(user)
@@ -37,6 +37,7 @@ def update_user(user_id: UUID, user: UserInUpdate, db: db_dependency) -> UserInR
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
     
     user_db.name = user.name
+    user_db.username = user.username
     user_db.email = user.email
     user_db.password = pwd_context.hash(user.password)
     db.commit()
