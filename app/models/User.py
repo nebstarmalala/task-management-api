@@ -9,6 +9,7 @@ class User(Base):
     
     id = Column(Uuid, primary_key=True, default=uuid.uuid4, index=True)
     name = Column(String(255))
+    username = Column(String(255), unique=True)
     email = Column(String(255), unique=True)
     password = Column(String(255))
     created_at = Column(DateTime, default=datetime.now)
