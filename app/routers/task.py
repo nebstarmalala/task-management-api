@@ -4,9 +4,12 @@ from app.db.database_connection import SessionLocal, get_db
 from app.models.Task import Task
 from app.schema.task_schema import TaskInCreate, TaskInResponse, TaskInUpdate
 from uuid import UUID
+from app.models.User import User
+from app.routers.auth import get_current_user
 
 taskrouter = APIRouter()
 db_dependency = Annotated[SessionLocal, Depends(get_db)]
+user_dependency = Annotated[User, Depends(get_current_user)]
 
 @taskrouter.get("/", status_code=status.HTTP_200_OK)
 async def list_tasks(db: db_dependency) -> List[TaskInResponse]: # type: ignore

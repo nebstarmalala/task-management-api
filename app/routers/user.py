@@ -5,10 +5,12 @@ from app.models.User import User
 from app.schema.user_schema import UserInCreate, UserInResponse, UserInUpdate
 from uuid import UUID
 from passlib.context import CryptContext
+from app.routers.auth import get_current_user
 
 userrouter = APIRouter()
 db_dependency = Annotated[SessionLocal, Depends(get_db)]
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+user_dependency = Annotated[User, Depends(get_current_user)]
 
 @userrouter.get("/", status_code=status.HTTP_200_OK)
 async def list_users(db: db_dependency) -> List[UserInResponse]: # type: ignore
